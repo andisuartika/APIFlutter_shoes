@@ -21,6 +21,7 @@ class AuthController extends Controller
         $token = $user->createToken('token')->plainTextToken;
         return response()->json(
             [
+                'success' => true,
                 'message' => 'Success',
                 'user' => $user,
                 'token' => $token,
@@ -32,6 +33,7 @@ class AuthController extends Controller
         $user->currentAccessToken()->delete();
         return response()->json(
             [
+                'success' => true,
                 'message' => 'Logout Success',
             ], 200);
     }

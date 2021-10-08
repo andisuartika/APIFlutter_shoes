@@ -25,7 +25,7 @@ class ProductController extends Controller
             ->select('products.*', 'categories.kategori')
             ->get();
         return response()->json([
-            'massage' => 'Success!',
+            'message' => 'Success!',
             'data_product' => $product
         ], 200);
     }
@@ -40,6 +40,7 @@ class ProductController extends Controller
     {
         $validasi = $request->validate([
             'nama'=>'required',
+            'seller'=>'required',
             'id_kategori'=>'required',
             'deskripsi'=>'required',
             'harga'=>'required',
@@ -48,21 +49,36 @@ class ProductController extends Controller
         ]);
 
         try{
-            $fileName = time().$request->file('gambar')->getClientOriginalName();
-            $path = $request->file('gambar')->storeAs('product',$fileName);
+            $fileName = time().$request->nama.$request->file('gambar')->getClientOriginalExtension();
+            $path = $request->file('gambar')->storeAs('/storage/app/product',$fileName);
             $validasi['gambar']=$path;
             $response =Product::create($validasi);
             return response()->json([
                 'success' => true,
-                'massage' => 'Product Created',
-                'product' => $response,
+                'message' => 'Product Created',
             ], 200);
         }catch(\Throwable $e){
             return response()->json([
-                'massage' => 'Err',
+                'message' => 'Err',
                 'errors' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $product = Product::find($id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Success',
+            'product' => $product,
+        ], 200);
     }
 
     /**
@@ -89,6 +105,7 @@ class ProductController extends Controller
 
         $request->validate([
             'nama'=>'required',
+            'seller'=>'seller',
             'id_kategori'=>'required',
             'deskripsi'=>'required',
             'harga'=>'required',
@@ -112,12 +129,11 @@ class ProductController extends Controller
             $product->update();
             return response()->json([
                 'success' => true,
-                'massage' => 'Product Updated',
-                'product' => $product,
+                'message' => 'Product Updated',
             ], 200);
         }catch(\Throwable $e){
             return response()->json([
-                'massage' => 'Err',
+                'message' => 'Err',
                 'errors' => $e->getMessage(),
             ]);
         }
@@ -135,8 +151,8 @@ class ProductController extends Controller
             unlink(storage_path("app/".$product->gambar));
             $delete = Product::find($id)->delete();
             return response()->json([
-                'massage' => 'Product deleted',
-                'data' => $product,
+                'success' => true,
+                'message' => 'Product deleted',
             ], 200);
     }
 
