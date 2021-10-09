@@ -30,6 +30,20 @@ class ProductController extends Controller
         ], 200);
     }
 
+    // product by seller
+    public function getProductBySeller($seller)
+    {
+        $product = DB::table('products')
+            ->join('categories', 'products.id_kategori', '=', 'categories.id')
+            ->select('products.*', 'categories.kategori')
+            ->where('products.seller','=',$seller)
+            ->get();
+        return response()->json([
+            'message' => 'Success!',
+            'data_product' => $product
+        ], 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -49,8 +63,8 @@ class ProductController extends Controller
         ]);
 
         try{
-            $fileName = time().$request->nama.$request->file('gambar')->getClientOriginalExtension();
-            $path = $request->file('gambar')->storeAs('/storage/app/product',$fileName);
+            $fileName = time().$request->nama.'.'.$request->file('gambar')->getClientOriginalExtension();
+            $path = $request->file('gambar')->storeAs('product',$fileName);
             $validasi['gambar']=$path;
             $response =Product::create($validasi);
             return response()->json([
@@ -105,7 +119,7 @@ class ProductController extends Controller
 
         $request->validate([
             'nama'=>'required',
-            'seller'=>'seller',
+            'seller'=>'required',
             'id_kategori'=>'required',
             'deskripsi'=>'required',
             'harga'=>'required',
@@ -114,6 +128,7 @@ class ProductController extends Controller
         ]);
 
         $product->nama = $request->nama;
+        $product->seller = $request->seller;
         $product->id_kategori = $request->id_kategori;
         $product->deskripsi = $request->deskripsi;
         $product->harga = $request->harga;
@@ -122,7 +137,7 @@ class ProductController extends Controller
         try{
             if($request->hasFile('gambar')){
                 unlink(storage_path("app/".$product->gambar));
-                $fileName = time().$request->file('gambar')->getClientOriginalName();
+                $fileName = time().$request->nama.'.'.$request->file('gambar')->getClientOriginalExtension();
                 $path = $request->file('gambar')->storeAs('product',$fileName);
                 $product->gambar = $path;
             }
